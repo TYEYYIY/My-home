@@ -1,54 +1,45 @@
-const CACHE_NAME = 'home-inv-v2.3.1'; // تم تغيير رقم الإصدار
+const CACHE_NAME = 'home-inv-v3.0.0';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
-  './icon.png'
+  './icon.svg'
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
 });
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then((keys) => Promise.all(
+      keys.map((key) => { if (key !== CACHE_NAME) return caches.delete(key); })
+    )).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (e) => {
+  // إذا كان الطلب هو فتح الصفحة الرئيسية
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      caches.match('./index.html').then((cached) => {
+        return cached || fetch(e.request);
+      })
+    );
+    return;
+  }
+
+  // لباقي الملفات
   e.respondWith(
     caches.match(e.request).then((cached) => {
-      // إذا وجد الملف في الكاش، قم بعرضه فوراً
-      if (cached) {
-        return cached;
-      }
-      // إذا لم يجده، اطلبه من الإنترنت
-      return fetch(e.request).catch(() => {
-        // إذا انقطع الإنترنت وكان الطلب هو فتح الصفحة الرئيسية، اعرض index.html
-        if (e.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
+      return cached || fetch(e.request);
     })
   );
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
