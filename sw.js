@@ -1,4 +1,4 @@
-const CACHE_NAME = 'home-inv-v2.3.0'; // تم رفع رقم الإصدار
+const CACHE_NAME = 'home-inv-v2.3.1'; // تم تغيير رقم الإصدار
 const ASSETS = [
   './',
   './index.html',
@@ -32,14 +32,23 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cached) => {
-      return cached || fetch(e.request);
+      // إذا وجد الملف في الكاش، قم بعرضه فوراً
+      if (cached) {
+        return cached;
+      }
+      // إذا لم يجده، اطلبه من الإنترنت
+      return fetch(e.request).catch(() => {
+        // إذا انقطع الإنترنت وكان الطلب هو فتح الصفحة الرئيسية، اعرض index.html
+        if (e.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
     })
   );
 });
 
-// هذا الجزء الجديد: للاستماع لأمر التحديث القادم من صفحة الإعدادات
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting(); // تفعيل التحديث الجديد فوراً
+    self.skipWaiting();
   }
 });

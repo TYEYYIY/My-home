@@ -135,7 +135,7 @@ window.onerror = function(msg, src, line){
 
 var App = (function(){
   var KEY = 'home_inv_v2';
-  var APP_VERSION = '2.3.0'; // رقم الإصدار الجديد
+  var APP_VERSION = '2.3.1'; // رقم الإصدار الجديد
   var UNITS = ['قطعة','كجم','جم','لتر','مل','علبة','كيس','زجاجة','عبوة','متر','صندوق','دستة','رول'];
   var DEF_CATS = ['مواد غذائية','منظفات','أدوات منزلية','عناية شخصية','أدوية','معلبات','مشروبات','بهارات','أخرى'];
 
@@ -853,12 +853,13 @@ function checkForUpdates() {
   }
 
   return {
-    boot: boot, tab: tab, setSearch: setSearch, setSort: setSort, setStatus: setStatus, setCat: setCat, setLogFilter: setLogFilter, toggleTheme: toggleTheme,
-    newItem: newItem, saveItem: saveItem, editItem: editItem, updateItem: updateItem, openOp: openOp, doOp: doOp, openMenu: openMenu,
-    quickAudit: quickAudit, doQuickAudit: doQuickAudit, deleteItem: deleteItem, closeModal: closeModal,
-    auditInput: auditInput, auditReset: auditReset, auditFill: auditFill, auditApply: auditApply, undo: undo,
-    setCurrency: setCurrency, exportData: exportData, importFile: importFile, clearLog: clearLog, clearAll: clearAll
-  };
+  boot: boot, tab: tab, setSearch: setSearch, setSort: setSort, setStatus: setStatus, setCat: setCat, setLogFilter: setLogFilter, toggleTheme: toggleTheme,
+  newItem: newItem, saveItem: saveItem, editItem: editItem, updateItem: updateItem, openOp: openOp, doOp: doOp, openMenu: openMenu,
+  quickAudit: quickAudit, doQuickAudit: doQuickAudit, deleteItem: deleteItem, closeModal: closeModal,
+  auditInput: auditInput, auditReset: auditReset, auditFill: auditFill, auditApply: auditApply, undo: undo,
+  setCurrency: setCurrency, exportData: exportData, importFile: importFile, clearLog: clearLog, clearAll: clearAll,
+  checkForUpdates: checkForUpdates // <--- أضف هذا السطر هنا
+};
 })();
 
 try {
