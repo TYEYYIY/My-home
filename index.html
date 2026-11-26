@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مخزون المنزل</title>
+<style>
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f1f5f9;color:#0f172a}
+*{box-sizing:border-box}
+#app{max-width:900px;margin:0 auto;padding:12px}
+.hd{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #e2e8f0;margin-bottom:12px}
+.hd h1{font-size:18px;margin:0}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto}
+.tabs button{flex:0 0 auto;padding:9px 16px;border-radius:99px;border:1px solid #e2e8f0;background:#fff;font-size:14px;cursor:pointer}
+.tabs button.on{background:#0d9488;color:#fff;border-color:#0d9488}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px;border-right:4px solid #16a34a}
+.card.low{border-right-color:#f59e0b}
+.card.out{border-right-color:#dc2626}
+.card h3{margin:0 0 6px;font-size:15px}
+.card .qty{font-size:22px;font-weight:bold}
+.card .meta{font-size:11px;color:#64748b;margin:4px 0 8px}
+.card .row{display:flex;gap:6px}
+.card .row button{flex:1;padding:7px;border-radius:8px;border:0;font-weight:bold;font-size:13px;cursor:pointer}
+.btn-in{background:#dcfce7;color:#16a34a}
+.btn-out{background:#fee2e2;color:#dc2626}
+.btn-gray{background:#f1f5f9;color:#334155}
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat div{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:17px}
+.stat span{font-size:11px;color:#64748b}
+.fab{position:fixed;bottom:20px;left:20px;width:56px;height:56px;border-radius:50%;border:0;background:#0d9488;color:#fff;font-size:30px;cursor:pointer;box-shadow:0 6px 20px rgba(13,148,136,.4)}
+.fld{display:block;margin-bottom:10px;font-size:13px;color:#475569;font-weight:bold}
+.fld input,.fld select{width:100%;padding:9px 11px;margin-top:4px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;background:#fff}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:14px;padding:18px;max-width:460px;width:100%;max-height:90vh;overflow-y:auto}
+.modal h2{margin:0 0 14px;font-size:16px}
+.modal .actions{display:flex;gap:8px;margin-top:12px}
+.modal .actions button{flex:1;padding:10px;border-radius:8px;border:0;font-weight:bold;cursor:pointer}
+.btn-primary{background:#0d9488;color:#fff}
+.btn-close{background:#f1f5f9;color:#334155}
+.alert{padding:10px;border-radius:8px;margin-bottom:10px;font-size:13px}
+.alert.ok{background:#dcfce7;color:#166534}
+.alert.warn{background:#fef3c7;color:#92400e}
+.row-item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px}
+.row-item .info{flex:1;min-width:0}
+.row-item .info b{display:block;font-size:14px}
+.row-item .info small{color:#64748b;font-size:11px}
+.row-item input{width:80px;padding:7px;border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:14px}
+.panel{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:12px}
+.panel h3{margin:0 0 10px;font-size:14px}
+.log-item{display:flex;gap:10px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px}
+.log-item .ic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.log-item .body{flex:1;min-width:0}
+.log-item .body b{font-size:13px;display:block}
+.log-item .body small{font-size:11px;color:#64748b;display:block}
+.log-item .val{font-weight:bold;font-size:13px;white-space:nowrap}
+.ic.in{background:#dcfce7;color:#16a34a}
+.ic.out{background:#fee2e2;color:#dc2626}
+.ic.adj{background:#fef3c7;color:#d97706}
+.ic.del{background:#fee2e2;color:#dc2626}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;opacity:0;transition:.2s;z-index:200;pointer-events:none}
+.toast.on{opacity:1}
+.empty{text-align:center;padding:40px 20px;color:#64748b;border:2px dashed #cbd5e1;border-radius:12px;font-size:13px}
+</style>
+</head>
+<body>
+
+<noscript>
+  <div style="padding:20px;background:#dc2626;color:#fff;text-align:center;font-size:16px">
+    الجافاسكريبت معطل في متصفحك. فعّله من إعدادات المتصفح ثم أعد تحميل الصفحة.
+  </div>
+</noscript>
+
+<div id="errbar" style="display:none;position:fixed;top:0;left:0;right:0;background:#dc2626;color:#fff;padding:10px;z-index:9999;text-align:center;font-size:13px"></div>
+
+<div id="boot" style="padding:40px 20px;text-align:center;font-size:15px;color:#475569">
+  جاري تحميل التطبيق...
+</div>
+
+<div id="app" style="display:none">
+  <div class="hd">
+    <h1>مخزون المنزل</h1>
+    <button onclick="App.toggleTheme()" id="themeBtn" style="padding:8px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;cursor:pointer">الوضع الليلي</button>
+  </div>
+
+  <div class="tabs">
+    <button class="on" data-tab="stock" onclick="App.tab('stock')">المخزون</button>
+    <button data-tab="audit" onclick="App.tab('audit')">الجرد</button>
+    <button data-tab="log" onclick="App.tab('log')">السجل</button>
+    <button data-tab="stats" onclick="App.tab('stats')">التقارير</button>
+  </div>
+
+  <div id="screen-stock"></div>
+  <div id="screen-audit" style="display:none"></div>
+  <div id="screen-log" style="display:none"></div>
+  <div id="screen-stats" style="display:none"></div>
+
+  <button class="fab" onclick="App.newItem()" title="إضافة صنف">+</button>
+</div>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)App.closeModal()">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+window.onerror = function(msg, src, line){
+  var bar = document.getElementById('errbar');
+  if(bar){
+    bar.style.display = 'block';
+    bar.textContent = 'خطأ: ' + msg + ' (سطر ' + line + ')';
+  }
+  return false;
+};
+
+var App = (function(){
+  var KEY = 'home_inv_v2';
+  var UNITS = ['قطعة','كجم','جم','لتر','مل','علبة','كيس','زجاجة','عبوة','متر','صندوق','دستة','رول'];
+  var DEF_CATS = ['مواد غذائية','منظفات','أدوات منزلية','عناية شخصية','أدوية','معلبات','مشروبات','بهارات','أخرى'];
+
+  var state = { items: [], log: [], currency: 'ج.م', theme: 'light' };
+  var audit = {};
+  var ui = { cat: 'all', status: 'all', q: '', sort: 'name', logF: 'all' };
+
+  /* أدوات */
+  function esc(s){
+    if(s === null || s === undefined) return '';
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function num(v){ var n = Number(v); return isFinite(n) ? n : 0; }
+  function fmt(n){
+    n = num(n);
+    return Number.isInteger(n) ? n.toLocaleString('en-US')
+      : n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  }
+  function fmtDate(ts){
+    var d = new Date(ts), p = function(x){ return ('0'+x).slice(-2); };
+    return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }
+  function uid(){ return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function $(id){ return document.getElementById(id); }
+  function el(sel){ return document.querySelector(sel); }
+
+  function toast(msg){
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast on';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ t.className = 'toast'; }, 2200);
+  }
+
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch(e){ toast('تعذر الحفظ'); }
+  }
+  function load(){
+    try {
+      var raw = localStorage.getItem(KEY);
+      if(!raw) return;
+      var p = JSON.parse(raw);
+      if(p && typeof p === 'object'){
+        state.items = Array.isArray(p.items) ? p.items : [];
+        state.log = Array.isArray(p.log) ? p.log : [];
+        state.currency = p.currency || 'ج.م';
+        state.theme = p.theme || 'light';
+      }
+    } catch(e){ console.warn('load error', e); }
+  }
+
+  function status(it){
+    var q = num(it.qty), m = num(it.minQty);
+    if(q <= 0) return 'out';
+    if(m > 0 && q <= m) return 'low';
+    return 'ok';
+  }
+  function findItem(id){
+    for(var i=0;i<state.items.length;i++) if(state.items[i].id === id) return state.items[i];
+    return null;
+  }
+  function pushLog(o){
+    var e = { id: uid(), at: Date.now(), note: '', price: 0 };
+    for(var k in o) if(Object.prototype.hasOwnProperty.call(o, k)) e[k] = o[k];
+    state.log.unshift(e);
+    if(state.log.length > 3000) state.log.length = 3000;
+  }
+
+  /* ========== التحميل ========== */
+  function boot(){
+    load();
+    applyTheme();
+    if(!state.items.length && !state.log.length){
+      var demo = [
+        { name:'أرز', category:'مواد غذائية', unit:'كجم', qty:5, minQty:2, price:35 },
+        { name:'سكر', category:'مواد غذائية', unit:'كجم', qty:1, minQty:2, price:28 },
+        { name:'زيت', category:'مواد غذائية', unit:'لتر', qty:3, minQty:1, price:65 },
+        { name:'صابون غسيل', category:'منظفات', unit:'علبة', qty:0, minQty:1, price:22 }
+      ];
+      for(var i=0;i<demo.length;i++){
+        demo[i].id = uid();
+        demo[i].createdAt = Date.now();
+        demo[i].note = '';
+        state.items.push(demo[i]);
+      }
+      save();
+    }
+    renderAll();
+  }
+
+  /* ========== الرندر ========== */
+  function renderAll(){
+    try { renderStock(); } catch(e){ console.error(e); }
+    try { renderAudit(); } catch(e){ console.error(e); }
+    try { renderLog(); } catch(e){ console.error(e); }
+    try { renderStats(); } catch(e){ console.error(e); }
+  }
+
+  /* ---- المخزون ---- */
+  function renderStock(){
+    var totVal = 0, low = 0, out = 0;
+    for(var i=0;i<state.items.length;i++){
+      var it = state.items[i];
+      totVal += num(it.qty) * num(it.price);
+      var st = status(it);
+      if(st === 'low') low++;
+      if(st === 'out') out++;
+    }
+
+    var html = '';
+    html += '<div class="stat">' +
+      '<div><b>'+state.items.length+'</b><span>الأصناف</span></div>' +
+      '<div><b>'+fmt(totVal)+'</b><span>قيمة ('+esc(state.currency)+')</span></div>' +
+      '<div><b style="color:#f59e0b">'+low+'</b><span>منخفض</span></div>' +
+      '<div><b style="color:#dc2626">'+out+'</b><span>نافد</span></div>' +
+      '</div>';
+
+    /* بحث وترتيب */
+    html += '<div style="display:flex;gap:8px;margin-bottom:10px">' +
+      '<input id="searchBox" placeholder="ابحث..." value="'+esc(ui.q)+'" ' +
+      'oninput="App.setSearch(this.value)" ' +
+      'style="flex:1;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px">' +
+      '<select onchange="App.setSort(this.value)" ' +
+      'style="padding:9px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;background:#fff">' +
+      '<option value="name"'+(ui.sort==='name'?' selected':'')+'>الاسم</option>' +
+      '<option value="qty"'+(ui.sort==='qty'?' selected':'')+'>الأقل كمية</option>' +
+      '<option value="value"'+(ui.sort==='value'?' selected':'')+'>الأعلى قيمة</option>' +
+      '</select></div>';
+
+    /* فلاتر حالة */
+    var sts = [ {k:'all',t:'الكل'}, {k:'ok',t:'متوفر'}, {k:'low',t:'منخفض'}, {k:'out',t:'نافد'} ];
+    html += '<div style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto">';
+    for(var s=0;s<sts.length;s++){
+      var x = sts[s];
+      html += '<button onclick="App.setStatus(\''+x.k+'\')" ' +
+        'style="padding:6px 14px;border-radius:99px;border:1px solid #e2e8f0;background:' +
+        (ui.status===x.k?'#0d9488':'#fff')+';color:'+(ui.status===x.k?'#fff':'#64748b')+
+        ';font-size:12px;white-space:nowrap;cursor:pointer">'+x.t+'</button>';
+    }
+    html += '</div>';
+
+    /* فلاتر فئة */
+    var seen = {}, cats = [];
+    for(var c=0;c<state.items.length;c++){
+      var cc = state.items[c].category;
+      if(cc && !seen[cc]){ seen[cc] = 1; cats.push(cc); }
+    }
+    if(cats.length){
+      html += '<div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto">' +
+        '<button onclick="App.setCat(\'all\')" ' +
+        'style="padding:6px 14px;border-radius:99px;border:1px solid #e2e8f0;background:' +
+        (ui.cat==='all'?'#0d9488':'#fff')+';color:'+(ui.cat==='all'?'#fff':'#64748b')+
+        ';font-size:12px;white-space:nowrap;cursor:pointer">كل الفئات</button>';
+      for(var k=0;k<cats.length;k++){
+        html += '<button onclick="App.setCat(\''+esc(cats[k])+'\')" ' +
+          'style="padding:6px 14px;border-radius:99px;border:1px solid #e2e8f0;background:' +
+          (ui.cat===cats[k]?'#0d9488':'#fff')+';color:'+(ui.cat===cats[k]?'#fff':'#64748b')+
+          ';font-size:12px;white-space:nowrap;cursor:pointer">'+esc(cats[k])+'</button>';
+      }
+      html += '</div>';
+    }
+
+    /* تصفية وترتيب */
+    var list = [];
+    for(var n=0;n<state.items.length;n++){
+      var item = state.items[n];
+      if(ui.cat !== 'all' && item.category !== ui.cat) continue;
+      if(ui.status !== 'all' && status(item) !== ui.status) continue;
+      if(ui.q){
+        var hay = (item.name + ' ' + (item.category||'') + ' ' + (item.note||'')).toLowerCase();
+        if(hay.indexOf(ui.q) === -1) continue;
+      }
+      list.push(item);
+    }
+    list.sort(function(a, b){
+      if(ui.sort === 'name') return (a.name||'').localeCompare(b.name||'');
+      if(ui.sort === 'qty') return num(a.qty) - num(b.qty);
+      return (num(b.qty)*num(b.price)) - (num(a.qty)*num(a.price));
+    });
+
+    if(!list.length){
+      html += '<div class="empty">' +
+        (state.items.length ? 'لا توجد نتائج' : 'لا يوجد أصناف — اضغط زر + للإضافة') +
+        '</div>';
+    } else {
+      html += '<div class="cards">';
+      for(var m=0;m<list.length;m++){
+        var l = list[m];
+        var st2 = status(l);
+        html += '<div class="card '+st2+'">' +
+          '<h3>'+esc(l.name)+'</h3>' +
+          '<div class="qty">'+fmt(l.qty)+' <span style="font-size:12px;color:#64748b">'+esc(l.unit||'')+'</span></div>' +
+          '<div class="meta">'+esc(l.category||'عام')+' • حد التنبيه: '+fmt(l.minQty)+
+            (num(l.price)>0 ? ' • '+fmt(num(l.qty)*num(l.price))+' '+esc(state.currency) : '') +
+          '</div>' +
+          '<div class="row">' +
+            '<button class="btn-in" onclick="App.openOp(\''+l.id+'\',\'in\')">+ إضافة</button>' +
+            '<button class="btn-out" onclick="App.openOp(\''+l.id+'\',\'out\')">− سحب</button>' +
+            '<button class="btn-gray" onclick="App.openMenu(\''+l.id+'\')">⋯</button>' +
+          '</div></div>';
+      }
+      html += '</div>';
+    }
+
+    $('screen-stock').innerHTML = html;
+  }
+
+  /* ---- الجرد ---- */
+  function renderAudit(){
+    var html = '<div class="panel"><h3>جرد كامل</h3>' +
+      '<p style="font-size:13px;color:#64748b;margin:0 0 10px">' +
+      'اكتب الكمية الفعلية لكل صنف، ثم اضغط «تطبيق الجرد» لتسجيل الفروقات.</p>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button onclick="App.auditReset()" class="btn-close" style="padding:8px 12px;border-radius:8px;border:0;cursor:pointer">تفريغ</button>' +
+        '<button onclick="App.auditFill()" class="btn-close" style="padding:8px 12px;border-radius:8px;border:0;cursor:pointer">ملء الحالي</button>' +
+        '<button onclick="App.auditApply()" class="btn-primary" style="padding:8px 14px;border-radius:8px;border:0;cursor:pointer">تطبيق الجرد</button>' +
+      '</div></div>';
+
+    if(!state.items.length){
+      html += '<div class="empty">أضف أصنافاً أولاً</div>';
+    } else {
+      var sorted = state.items.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+      for(var i=0;i<sorted.length;i++){
+        var it = sorted[i];
+        var v = audit[it.id];
+        var diff = (v === undefined || v === '') ? '' : (num(v) - num(it.qty));
+        var dtxt = '', dcol = '#64748b';
+        if(diff !== ''){
+          dtxt = (diff > 0 ? '+' : '') + fmt(diff);
+          dcol = diff > 0 ? '#16a34a' : diff < 0 ? '#dc2626' : '#64748b';
+        }
+        html += '<div class="row-item">' +
+          '<div class="info"><b>'+esc(it.name)+'</b>' +
+            '<small>'+esc(it.unit||'')+' • بالنظام: '+fmt(it.qty)+'</small></div>' +
+          '<input type="number" step="any" data-audit="'+it.id+'" ' +
+            'value="'+(v!==undefined ? esc(v) : '')+'" placeholder="الفعلي" ' +
+            'oninput="App.auditInput(\''+it.id+'\',this.value)">' +
+          '<span style="font-size:12px;font-weight:bold;color:'+dcol+';min-width:44px;text-align:center" ' +
+            'id="diff-'+it.id+'">'+dtxt+'</span>' +
+          '</div>';
+      }
+    }
+    $('screen-audit').innerHTML = html;
+  }
+
+  /* ---- السجل ---- */
+  function renderLog(){
+    var fs = [ {k:'all',t:'الكل'}, {k:'in',t:'إضافات'}, {k:'out',t:'سحب'}, {k:'adjust',t:'جرد'} ];
+    var html = '<div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto">';
+    for(var i=0;i<fs.length;i++){
+      var f = fs[i];
+      html += '<button onclick="App.setLogFilter(\''+f.k+'\')" ' +
+        'style="padding:6px 14px;border-radius:99px;border:1px solid #e2e8f0;background:' +
+        (ui.logF===f.k?'#0d9488':'#fff')+';color:'+(ui.logF===f.k?'#fff':'#64748b')+
+        ';font-size:12px;white-space:nowrap;cursor:pointer">'+f.t+'</button>';
+    }
+    html += '</div>';
+
+    var rows = [];
+    for(var j=0;j<state.log.length;j++){
+      if(ui.logF === 'all' || state.log[j].type === ui.logF) rows.push(state.log[j]);
+    }
+
+    if(!rows.length){
+      html += '<div class="empty">لا توجد حركات مسجلة</div>';
+    } else {
+      for(var m=0;m<rows.length;m++){
+        var lg = rows[m];
+        var meta = {
+          'in': { icon: '↓', cls: 'in', label: 'إضافة' },
+          'out': { icon: '↑', cls: 'out', label: 'سحب' },
+          'adjust': { icon: '=', cls: 'adj', label: 'جرد' },
+          'del': { icon: '×', cls: 'del', label: 'حذف' }
+        }[lg.type] || { icon: '?', cls: 'adj', label: '' };
+
+        var valTxt = '';
+        if(lg.type === 'in') valTxt = '+' + fmt(lg.qty);
+        else if(lg.type === 'out') valTxt = '−' + fmt(lg.qty);
+        else if(lg.type === 'adjust') valTxt = '= ' + fmt(lg.after);
+        else valTxt = '−' + fmt(lg.qty);
+
+        var valColor = lg.type === 'in' ? '#16a34a' : lg.type === 'out' ? '#dc2626' : '#d97706';
+
+        html += '<div class="log-item">' +
+          '<div class="ic '+meta.cls+'">'+meta.icon+'</div>' +
+          '<div class="body"><b>'+esc(lg.itemName)+' <span style="color:#64748b;font-weight:normal">— '+meta.label+'</span></b>' +
+            '<small>'+fmt(lg.before)+' → '+fmt(lg.after)+' '+esc(lg.unit||'')+' • '+fmtDate(lg.at)+'</small>' +
+            (lg.note ? '<small style="color:#0d9488">'+esc(lg.note)+'</small>' : '') +
+          '</div>' +
+          '<div style="text-align:left">' +
+            '<div class="val" style="color:'+valColor+'">'+valTxt+'</div>' +
+            (lg.type !== 'del' && findItem(lg.itemId) ?
+              '<button onclick="App.undo(\''+lg.id+'\')" class="btn-gray" ' +
+              'style="padding:3px 8px;border-radius:6px;border:0;font-size:11px;margin-top:4px;cursor:pointer">تراجع</button>' : '') +
+          '</div></div>';
+      }
+    }
+    $('screen-log').innerHTML = html;
+  }
+
+  /* ---- التقارير ---- */
+  function renderStats(){
+    var totalValue = 0, lowItems = [];
+    for(var i=0;i<state.items.length;i++){
+      totalValue += num(state.items[i].qty) * num(state.items[i].price);
+      if(status(state.items[i]) !== 'ok') lowItems.push(state.items[i]);
+    }
+
+    var byCat = {}, catKeys = [];
+    for(var j=0;j<state.items.length;j++){
+      var it = state.items[j];
+      var c = it.category || 'عام';
+      if(!byCat[c]){ byCat[c] = 0; catKeys.push(c); }
+      byCat[c] += num(it.qty) * num(it.price);
+    }
+
+    var consumed = {}, conKeys = [];
+    for(var k=0;k<state.log.length;k++){
+      var l = state.log[k];
+      if(l.type === 'out'){
+        if(!consumed[l.itemName]){ consumed[l.itemName] = 0; conKeys.push(l.itemName); }
+        consumed[l.itemName] += num(l.qty);
+      }
+    }
+    conKeys.sort(function(a,b){ return consumed[b] - consumed[a]; });
+    conKeys = conKeys.slice(0, 6);
+
+    var inC = 0, outC = 0;
+    for(var x=0;x<state.log.length;x++){
+      if(state.log[x].type === 'in') inC++;
+      if(state.log[x].type === 'out') outC++;
+    }
+
+    var html = '<div class="stat">' +
+      '<div><b>'+fmt(totalValue)+'</b><span>قيمة ('+esc(state.currency)+')</span></div>' +
+      '<div><b>'+state.items.length+'</b><span>أصناف</span></div>' +
+      '<div><b>'+inC+'</b><span>إضافات</span></div>' +
+      '<div><b>'+outC+'</b><span>سحب</span></div>' +
+      '</div>';
+
+    html += '<div class="panel"><h3>القيمة حسب الفئة</h3>';
+    if(!catKeys.length){
+      html += '<p style="color:#64748b;font-size:13px;margin:0">لا توجد أصناف</p>';
+    } else {
+      var maxV = 1;
+      for(var a=0;a<catKeys.length;a++) if(byCat[catKeys[a]] > maxV) maxV = byCat[catKeys[a]];
+      for(var b=0;b<catKeys.length;b++){
+        var kk = catKeys[b];
+        var pct = (byCat[kk] / maxV) * 100;
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px">' +
+          '<span style="flex:0 0 90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(kk)+'</span>' +
+          '<div style="flex:1;height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden">' +
+            '<div style="height:100%;width:'+pct+'%;background:#0d9488"></div></div>' +
+          '<span style="min-width:50px;text-align:left;font-weight:bold">'+fmt(byCat[kk])+'</span>' +
+          '</div>';
+      }
+    }
+    html += '</div>';
+
+    html += '<div class="panel"><h3>أكثر الأصناف استهلاكاً</h3>';
+    if(!conKeys.length){
+      html += '<p style="color:#64748b;font-size:13px;margin:0">لا توجد عمليات سحب بعد</p>';
+    } else {
+      var maxC = consumed[conKeys[0]] || 1;
+      for(var d=0;d<conKeys.length;d++){
+        var nm = conKeys[d];
+        var p2 = (consumed[nm] / maxC) * 100;
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px">' +
+          '<span style="flex:0 0 90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(nm)+'</span>' +
+          '<div style="flex:1;height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden">' +
+            '<div style="height:100%;width:'+p2+'%;background:#dc2626"></div></div>' +
+          '<span style="min-width:50px;text-align:left;font-weight:bold">'+fmt(consumed[nm])+'</span>' +
+          '</div>';
+      }
+    }
+    html += '</div>';
+
+    html += '<div class="panel"><h3>أصناف تحتاج شراء ('+lowItems.length+')</h3>';
+    if(!lowItems.length){
+      html += '<p style="color:#16a34a;font-size:13px;margin:0">كل الأصناف متوفرة</p>';
+    } else {
+      for(var e=0;e<lowItems.length;e++){
+        var li = lowItems[e];
+        var col = status(li) === 'out' ? '#dc2626' : '#f59e0b';
+        html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;font-size:13px">' +
+          '<span>'+esc(li.name)+'</span>' +
+          '<b style="color:'+col+'">'+fmt(li.qty)+' '+esc(li.unit||'')+'</b></div>';
+      }
+    }
+    html += '</div>';
+
+    html += '<div class="panel"><h3>إعدادات</h3>' +
+      '<label class="fld">العملة' +
+        '<input id="curIn" value="'+esc(state.currency)+'" onchange="App.setCurrency(this.value)">' +
+      '</label>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">' +
+        '<button onclick="App.exportData()" class="btn-close" style="padding:8px 12px;border-radius:8px;border:0;cursor:pointer">تصدير</button>' +
+        '<button onclick="document.getElementById(\'impFile\').click()" class="btn-close" style="padding:8px 12px;border-radius:8px;border:0;cursor:pointer">استيراد</button>' +
+        '<button onclick="App.clearLog()" class="btn-close" style="padding:8px 12px;border-radius:8px;border:0;cursor:pointer">تفريغ السجل</button>' +
+        '<button onclick="App.clearAll()" style="padding:8px 12px;border-radius:8px;border:0;background:#fee2e2;color:#dc2626;cursor:pointer">حذف الكل</button>' +
+      '</div>' +
+      '<input type="file" id="impFile" accept=".json,application/json" onchange="App.importFile(this)" style="display:none">' +
+      '</div>';
+
+    $('screen-stats').innerHTML = html;
+  }
+
+  /* ========== النوافذ ========== */
+  function openModal(html){
+    $('modalBox').innerHTML = html;
+    $('modalBg').className = 'modal-bg on';
+  }
+  function closeModal(){
+    $('modalBg').className = 'modal-bg';
+  }
+
+  function newItem(){
+    var cats = DEF_CATS.slice();
+    for(var i=0;i<state.items.length;i++){
+      var c = state.items[i].category;
+      if(c && cats.indexOf(c) === -1) cats.push(c);
+    }
+    var catOpts = cats.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('');
+    var unitOpts = UNITS.map(function(u){ return '<option value="'+esc(u)+'">'; }).join('');
+
+    openModal('<h2>إضافة صنف جديد</h2>' +
+      '<form onsubmit="return App.saveItem(event)">' +
+      '<label class="fld">اسم الصنف *<input name="name" required autocomplete="off"></label>' +
+      '<label class="fld">الفئة<input name="category" list="cats" autocomplete="off" placeholder="مواد غذائية">' +
+        '<datalist id="cats">'+catOpts+'</datalist></label>' +
+      '<label class="fld">الوحدة<input name="unit" list="units" autocomplete="off" placeholder="كجم">' +
+        '<datalist id="units">'+unitOpts+'</datalist></label>' +
+      '<label class="fld">الكمية الابتدائية<input name="qty" type="number" step="any" min="0" value="0"></label>' +
+      '<label class="fld">حد التنبيه<input name="minQty" type="number" step="any" min="0" value="1"></label>' +
+      '<label class="fld">سعر الوحدة ('+esc(state.currency)+')<input name="price" type="number" step="any" min="0" value="0"></label>' +
+      '<label class="fld">ملاحظات<input name="note" autocomplete="off"></label>' +
+      '<div class="actions">' +
+        '<button type="button" class="btn-close" onclick="App.closeModal()">إلغاء</button>' +
+        '<button type="submit" class="btn-primary">حفظ</button>' +
+      '</div></form>');
+    setTimeout(function(){ var f = document.querySelector('#modalBox input[name="name"]'); if(f) f.focus(); }, 50);
+  }
+
+  function saveItem(ev){
+    ev.preventDefault();
+    var form = ev.target;
+    var d = {
+      name: form.name.value.trim(),
+      category: form.category.value.trim() || 'عام',
+      unit: form.unit.value.trim() || 'قطعة',
+      qty: num(form.qty.value),
+      minQty: num(form.minQty.value),
+      price: num(form.price.value),
+      note: form.note.value.trim()
+    };
+    if(!d.name){ toast('اكتب اسم الصنف'); return false; }
+
+    var it = { id: uid(), createdAt: Date.now(),
+      name: d.name, category: d.category, unit: d.unit,
+      qty: d.qty, minQty: d.minQty, price: d.price, note: d.note };
+    state.items.push(it);
+    if(d.qty > 0){
+      pushLog({ itemId: it.id, itemName: it.name, unit: it.unit, type: 'in',
+        qty: d.qty, before: 0, after: d.qty, note: 'رصيد افتتاحي', price: d.price });
+    }
+    save();
+    closeModal();
+    renderAll();
+    toast('تمت الإضافة');
+    return false;
+  }
+
+  function editItem(id){
+    var it = findItem(id);
+    if(!it) return;
+    var cats = DEF_CATS.slice();
+    for(var i=0;i<state.items.length;i++){
+      var c = state.items[i].category;
+      if(c && cats.indexOf(c) === -1) cats.push(c);
+    }
+    var catOpts = cats.map(function(c){ return '<option value="'+esc(c)+'">'; }).join('');
+    var unitOpts = UNITS.map(function(u){ return '<option value="'+esc(u)+'">'; }).join('');
+
+    openModal('<h2>تعديل الصنف</h2>' +
+      '<form onsubmit="return App.updateItem(event,\''+id+'\')">' +
+      '<label class="fld">الاسم *<input name="name" required value="'+esc(it.name)+'"></label>' +
+      '<label class="fld">الفئة<input name="category" list="catsE" value="'+esc(it.category||'')+'">' +
+        '<datalist id="catsE">'+catOpts+'</datalist></label>' +
+      '<label class="fld">الوحدة<input name="unit" list="unitsE" value="'+esc(it.unit||'')+'">' +
+        '<datalist id="unitsE">'+unitOpts+'</datalist></label>' +
+      '<label class="fld">الكمية<input name="qty" type="number" step="any" min="0" value="'+num(it.qty)+'"></label>' +
+      '<label class="fld">حد التنبيه<input name="minQty" type="number" step="any" min="0" value="'+num(it.minQty)+'"></label>' +
+      '<label class="fld">سعر الوحدة<input name="price" type="number" step="any" min="0" value="'+num(it.price)+'"></label>' +
+      '<label class="fld">ملاحظات<input name="note" value="'+esc(it.note||'')+'"></label>' +
+      '<div class="actions">' +
+        '<button type="button" class="btn-close" onclick="App.closeModal()">إلغاء</button>' +
+        '<button type="submit" class="btn-primary">حفظ</button>' +
+      '</div></form>');
+  }
+
+  function updateItem(ev, id){
+    ev.preventDefault();
+    var it = findItem(id);
+    if(!it) return false;
+    var form = ev.target;
+    var before = num(it.qty);
+    it.name = form.name.value.trim() || it.name;
+    it.category = form.category.value.trim() || 'عام';
+    it.unit = form.unit.value.trim() || 'قطعة';
+    it.qty = num(form.qty.value);
+    it.minQty = num(form.minQty.value);
+    it.price = num(form.price.value);
+    it.note = form.note.value.trim();
+    if(Math.abs(before - it.qty) > 0.0001){
+      pushLog({ itemId: it.id, itemName: it.name, unit: it.unit, type: 'adjust',
+        qty: it.qty, before: before, after: it.qty, note: 'تعديل يدوي', price: it.price });
+    }
+    save();
+    closeModal();
+    renderAll();
+    toast('تم التعديل');
+    return false;
+  }
+
+  function openOp(id, type){
+    var it = findItem(id);
+    if(!it) return;
+    var isIn = type === 'in';
+    openModal('<h2>'+(isIn ? 'إضافة للمخزون' : 'سحب / استهلاك')+'</h2>' +
+      '<p style="text-align:center;color:#64748b;font-size:13px;margin:0 0 12px">' +
+        '<b style="color:#0f172a;font-size:15px">'+esc(it.name)+'</b><br>' +
+        'المتاح: '+fmt(it.qty)+' '+esc(it.unit||'')+'</p>' +
+      '<form onsubmit="return App.doOp(event,\''+id+'\',\''+type+'\')">' +
+      '<label class="fld">الكمية ('+esc(it.unit||'')+')' +
+        '<input name="qty" type="number" step="any" min="0" required placeholder="0"></label>' +
+      '<label class="fld">ملاحظة<input name="note" placeholder="'+(isIn?'شراء':'استهلاك')+'"></label>' +
+      '<div class="actions">' +
+        '<button type="button" class="btn-close" onclick="App.closeModal()">إلغاء</button>' +
+        '<button type="submit" class="btn-primary">'+(isIn?'إضافة':'سحب')+'</button>' +
+      '</div></form>');
+    setTimeout(function(){
+      var f = document.querySelector('#modalBox input[name="qty"]');
+      if(f) f.focus();
+    }, 50);
+  }
+
+  function doOp(ev, id, type){
+    ev.preventDefault();
+    var it = findItem(id);
+    if(!it) return false;
+    var q = num(ev.target.qty.value);
+    if(q <= 0){ toast('أدخل كمية صحيحة'); return false; }
+    if(type === 'out' && q > num(it.qty)){
+      if(!confirm('الكمية أكبر من المتاح. المتابعة؟')) return false;
+    }
+    var before = num(it.qty), after;
+    if(type === 'in') after = before + q;
+    else after = before - q;
+    after = Math.round(after * 1000) / 1000;
+    it.qty = after;
+    pushLog({ itemId: it.id, itemName: it.name, unit: it.unit, type: type,
+      qty: q, before: before, after: after, note: ev.target.note.value.trim(), price: it.price });
+    save();
+    closeModal();
+    renderAll();
+    toast((type === 'in' ? 'تمت الإضافة — ' : 'تم السحب — ') + 'الرصيد: ' + fmt(after));
+    return false;
+  }
+
+  function openMenu(id){
+    var it = findItem(id);
+    if(!it) return;
+    openModal('<h2>'+esc(it.name)+'</h2>' +
+      '<div style="display:grid;gap:8px">' +
+        '<button onclick="App.editItem(\''+id+'\')" class="btn-close" style="padding:12px;border-radius:8px;border:0;cursor:pointer;font-size:14px">تعديل البيانات</button>' +
+        '<button onclick="App.quickAudit(\''+id+'\')" class="btn-close" style="padding:12px;border-radius:8px;border:0;cursor:pointer;font-size:14px">جرد سريع</button>' +
+        '<button onclick="App.deleteItem(\''+id+'\')" style="padding:12px;border-radius:8px;border:0;cursor:pointer;font-size:14px;background:#fee2e2;color:#dc2626">حذف الصنف</button>' +
+        '<button onclick="App.closeModal()" class="btn-close" style="padding:12px;border-radius:8px;border:0;cursor:pointer;font-size:14px">إلغاء</button>' +
+      '</div>');
+  }
+
+  function quickAudit(id){
+    var it = findItem(id);
+    if(!it) return;
+    openModal('<h2>جرد: '+esc(it.name)+'</h2>' +
+      '<p style="text-align:center;color:#64748b;font-size:13px;margin:0 0 12px">' +
+      'بالنظام: <b style="color:#0f172a">'+fmt(it.qty)+'</b> '+esc(it.unit||'')+'</p>' +
+      '<form onsubmit="return App.doQuickAudit(event,\''+id+'\')">' +
+      '<label class="fld">الكمية الفعلية' +
+        '<input name="qty" type="number" step="any" min="0" value="'+num(it.qty)+'" required></label>' +
+      '<div class="actions">' +
+        '<button type="button" class="btn-close" onclick="App.closeModal()">إلغاء</button>' +
+        '<button type="submit" class="btn-primary">تطبيق</button>' +
+      '</div></form>');
+  }
+
+  function doQuickAudit(ev, id){
+    ev.preventDefault();
+    var it = findItem(id);
+    if(!it) return false;
+    var v = num(ev.target.qty.value);
+    var before = num(it.qty);
+    if(Math.abs(v - before) < 0.0001){ toast('لا يوجد فرق'); closeModal(); return false; }
+    it.qty = v;
+    pushLog({ itemId: it.id, itemName: it.name, unit: it.unit, type: 'adjust',
+      qty: v, before: before, after: v, note: 'تسوية جرد', price: it.price });
+    save();
+    closeModal();
+    renderAll();
+    toast('تم تسجيل الجرد');
+    return false;
+  }
+
+  function deleteItem(id){
+    var it = findItem(id);
+    if(!it) return;
+    if(!confirm('حذف «'+it.name+'» نهائياً؟')) return;
+    pushLog({ itemId: it.id, itemName: it.name, unit: it.unit, type: 'del',
+      qty: num(it.qty), before: num(it.qty), after: 0, note: 'حذف الصنف' });
+    var newItems = [];
+    for(var i=0;i<state.items.length;i++){
+      if(state.items[i].id !== id) newItems.push(state.items[i]);
+    }
+    state.items = newItems;
+    delete audit[id];
+    save();
+    closeModal();
+    renderAll();
+    toast('تم الحذف');
+  }
+
+  /* ========== الجرد ========== */
+  function auditInput(id, val){
+    audit[id] = val;
+    var it = findItem(id);
+    var el = $('diff-' + id);
+    if(!it || !el) return;
+    if(val === '' || val === null){ el.textContent = ''; el.style.color = '#64748b'; return; }
+    var d = num(val) - num(it.qty);
+    el.textContent = (d > 0 ? '+' : '') + fmt(d);
+    el.style.color = d > 0 ? '#16a34a' : d < 0 ? '#dc2626' : '#64748b';
+  }
+  function auditReset(){ audit = {}; renderAudit(); toast('تم التفريغ'); }
+  function auditFill(){
+    audit = {};
+    for(var i=0;i<state.items.length;i++) audit[state.items[i].id] = String(num(state.items[i].qty));
+    renderAudit();
+    toast('تم الملء');
+  }
+  function auditApply(){
+    var count = 0;
+    for(var k in audit){
+      if(!Object.prototype.hasOwnProperty.call(audit, k)) continue;
+      var raw = audit[k];
+      if(raw === '' || raw === null || raw === undefined) continue;
+      var it = findItem(k);
+      if(!it) continue;
+      var v = num(raw), before = num(it.qty);
+      if(Math.abs(v - before) < 0.0001) continue;
+      it.qty = Math.round(v * 1000) / 1000;
+      pushLog({ itemId: it.id, itemName: it.name, unit: it.unit, type: 'adjust',
+        qty: v, before: before, after: it.qty, note: 'تسوية جرد', price: it.price });
+      count++;
+    }
+    if(count){
+      save();
+      audit = {};
+      renderAll();
+      toast('تم تطبيق الجرد على ' + count + ' صنف');
+    } else {
+      toast('لا توجد فروق');
+    }
+  }
+
+  /* ========== السجل ========== */
+  function setLogFilter(k){ ui.logF = k; renderLog(); }
+
+  function undo(logId){
+    var entry = null;
+    for(var i=0;i<state.log.length;i++) if(state.log[i].id === logId){ entry = state.log[i]; break; }
+    if(!entry) return;
+    var it = findItem(entry.itemId);
+    if(!it){ toast('الصنف غير موجود'); return; }
+    if(!confirm('التراجع عن هذه الحركة؟')) return;
+    if(entry.type === 'in') it.qty = Math.round((num(it.qty) - num(entry.qty)) * 1000) / 1000;
+    else if(entry.type === 'out') it.qty = Math.round((num(it.qty) + num(entry.qty)) * 1000) / 1000;
+    else it.qty = num(entry.before);
+    var newLog = [];
+    for(var j=0;j<state.log.length;j++) if(state.log[j].id !== logId) newLog.push(state.log[j]);
+    state.log = newLog;
+    save();
+    renderAll();
+    toast('تم التراجع');
+  }
+
+  /* ========== UI ========== */
+  function tab(name){
+    var btns = document.querySelectorAll('.tabs button');
+    for(var i=0;i<btns.length;i++){
+      btns[i].className = btns[i].getAttribute('data-tab') === name ? 'on' : '';
+    }
+    var screens = ['stock', 'audit', 'log', 'stats'];
+    for(var j=0;j<screens.length;j++){
+      $('screen-' + screens[j]).style.display = (screens[j] === name) ? 'block' : 'none';
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function setSearch(v){ ui.q = v.toLowerCase().trim(); renderStock(); }
+  function setSort(v){ ui.sort = v; renderStock(); }
+  function setStatus(v){ ui.status = v; renderStock(); }
+  function setCat(v){ ui.cat = v; renderStock(); }
+
+  function toggleTheme(){
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    save();
+    applyTheme();
+  }
+  function applyTheme(){
+    if(state.theme === 'dark'){
+      document.body.style.background = '#0b1220';
+      document.body.style.color = '#e2e8f0';
+      var h = $('themeBtn');
+      if(h) h.textContent = 'الوضع النهاري';
+    } else {
+      document.body.style.background = '#f1f5f9';
+      document.body.style.color = '#0f172a';
+      var h2 = $('themeBtn');
+      if(h2) h2.textContent = 'الوضع الليلي';
+    }
+  }
+
+  /* ========== إعدادات ========== */
+  function setCurrency(v){ state.currency = v.trim() || 'ج.م'; save(); renderAll(); }
+  function exportData(){
+    var data = JSON.stringify(state, null, 2);
+    var blob = new Blob([data], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'inventory-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    toast('تم التصدير');
+  }
+  function importFile(inp){
+    var file = inp.files[0];
+    if(!file) return;
+    var r = new FileReader();
+    r.onload = function(){
+      try {
+        var d = JSON.parse(r.result);
+        if(!d || !Array.isArray(d.items)) throw new Error('bad');
+        if(!confirm('استبدال البيانات الحالية؟')) return;
+        state.items = d.items;
+        state.log = Array.isArray(d.log) ? d.log : [];
+        state.currency = d.currency || 'ج.م';
+        audit = {};
+        save();
+        renderAll();
+        toast('تم الاستيراد');
+      } catch(e){ toast('ملف غير صالح'); }
+    };
+    r.readAsText(file);
+    inp.value = '';
+  }
+  function clearLog(){
+    if(!confirm('تفريغ السجل بالكامل؟')) return;
+    state.log = [];
+    save();
+    renderAll();
+    toast('تم التفريغ');
+  }
+  function clearAll(){
+    if(!confirm('حذف كل البيانات نهائياً؟')) return;
+    if(!confirm('تأكيد أخير؟')) return;
+    state.items = [];
+    state.log = [];
+    audit = {};
+    save();
+    renderAll();
+    toast('تم الحذف');
+  }
+
+  return {
+    boot: boot,
+    tab: tab,
+    setSearch: setSearch, setSort: setSort, setStatus: setStatus, setCat: setCat,
+    setLogFilter: setLogFilter,
+    toggleTheme: toggleTheme,
+    newItem: newItem, saveItem: saveItem,
+    editItem: editItem, updateItem: updateItem,
+    openOp: openOp, doOp: doOp,
+    openMenu: openMenu,
+    quickAudit: quickAudit, doQuickAudit: doQuickAudit,
+    deleteItem: deleteItem,
+    closeModal: closeModal,
+    auditInput: auditInput, auditReset: auditReset, auditFill: auditFill, auditApply: auditApply,
+    undo: undo,
+    setCurrency: setCurrency, exportData: exportData, importFile: importFile,
+    clearLog: clearLog, clearAll: clearAll
+  };
+})();
+
+/* ========== التشغيل ========== */
+try {
+  App.boot();
+  document.getElementById('boot').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+} catch(e){
+  document.getElementById('boot').innerHTML =
+    '<div style="padding:20px;background:#fee2e2;color:#991b1b;border-radius:8px;text-align:center;margin:20px">' +
+      '<b>خطأ في التشغيل:</b><br>' + (e.message || e) +
+      '<br><br><button onclick="try{localStorage.clear();location.reload();}catch(x){}" ' +
+        'style="padding:10px 20px;background:#dc2626;color:#fff;border:0;border-radius:8px;cursor:pointer">' +
+        'إعادة تعيين التطبيق</button>' +
+    '</div>';
+}
+</script>
+</body>
+</html>
