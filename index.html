@@ -114,6 +114,14 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed', err));
   });
+
+  // هذا الجزء مهم: إعادة تحميل الصفحة تلقائياً بمجرد اكتمال التحديث
+  var refreshing;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
 }
 
 window.onerror = function(msg, src, line){
@@ -127,7 +135,7 @@ window.onerror = function(msg, src, line){
 
 var App = (function(){
   var KEY = 'home_inv_v2';
-  var APP_VERSION = '2.2.0'; // رقم الإصدار الجديد
+  var APP_VERSION = '2.3.0'; // رقم الإصدار الجديد
   var UNITS = ['قطعة','كجم','جم','لتر','مل','علبة','كيس','زجاجة','عبوة','متر','صندوق','دستة','رول'];
   var DEF_CATS = ['مواد غذائية','منظفات','أدوات منزلية','عناية شخصية','أدوية','معلبات','مشروبات','بهارات','أخرى'];
 
@@ -475,30 +483,90 @@ var App = (function(){
     $('screen-stats').innerHTML = html;
   }
 
-  // صفحة الإعدادات الجديدة
-  function renderSettings(){
-    var html = '<div class="panel">' +
-      '<h3>⚙️ إعدادات التطبيق</h3>' +
-      '<label class="fld">العملة<input value="'+esc(state.currency)+'" onchange="App.setCurrency(this.value)"></label>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
-        '<button onclick="App.exportData()" class="btn-primary" style="padding:10px 14px;border-radius:8px;border:0;cursor:pointer">تصدير نسخة احتياطية</button>' +
-        '<button onclick="document.getElementById(\'impFile\').click()" class="btn-close" style="padding:10px 14px;border-radius:8px;border:0;cursor:pointer">استيراد نسخة</button>' +
-        '<button onclick="App.clearLog()" class="btn-close" style="padding:10px 14px;border-radius:8px;border:0;cursor:pointer">تفريغ السجل</button>' +
-        '<button onclick="App.clearAll()" style="padding:10px 14px;border-radius:8px;border:0;background:#fee2e2;color:#dc2626;cursor:pointer">حذف كل البيانات</button>' +
-      '</div>' +
-      '<input type="file" id="impFile" accept=".json,application/json" onchange="App.importFile(this)" style="display:none">' +
-    '</div>';
+// صفحة الإعدادات الجديدة
+function renderSettings(){
+  var html = '<div class="panel">' +
+    '<h3>⚙️ إعدادات التطبيق</h3>' +
+    '<label class="fld">العملة<input value="'+esc(state.currency)+'" onchange="App.setCurrency(this.value)"></label>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
+      '<button onclick="App.exportData()" class="btn-primary" style="padding:10px 14px;border-radius:8px;border:0;cursor:pointer">تصدير نسخة احتياطية</button>' +
+      '<button onclick="document.getElementById(\'impFile\').click()" class="btn-close" style="padding:10px 14px;border-radius:8px;border:0;cursor:pointer">استيراد نسخة</button>' +
+      '<button onclick="App.clearLog()" class="btn-close" style="padding:10px 14px;border-radius:8px;border:0;cursor:pointer">تفريغ السجل</button>' +
+      '<button onclick="App.clearAll()" style="padding:10px 14px;border-radius:8px;border:0;background:#fee2e2;color:#dc2626;cursor:pointer">حذف كل البيانات</button>' +
+    '</div>' +
+    '<input type="file" id="impFile" accept=".json,application/json" onchange="App.importFile(this)" style="display:none">' +
+  '</div>';
 
-    html += '<div class="panel">' +
-      '<h3>معلومات التطبيق</h3>' +
-      '<p style="font-size:13px;color:#475569;margin:0 0 6px">اسم التطبيق: مخزون المنزل</p>' +
-      '<p style="font-size:13px;color:#475569;margin:0 0 6px">رقم الإصدار: <b style="color:#0d9488">v'+APP_VERSION+'</b></p>' +
-      '<p style="font-size:13px;color:#475569;margin:0 0 6px">الحالة: يعمل بدون إنترنت (PWA)</p>' +
-      '<p style="font-size:11px;color:#94a3b8;margin-top:10px">تم التطوير ليعمل محلياً بالكامل بدون أي خوادم خارجية لحماية خصوصيتك.</p>' +
-    '</div>';
+  // ---- قسم التحديثات الجديد ----
+  html += '<div class="panel">' +
+    '<h3>🔄 تحديثات التطبيق</h3>' +
+    '<p style="font-size:13px;color:#475569;margin:0 0 10px">اضغط على الزر للبحث عن أي تحديثات جديدة تم رفعها على السيرفر.</p>' +
+    '<button id="updateBtn" onclick="App.checkForUpdates()" class="btn-primary" style="width:100%;padding:12px;border-radius:8px;border:0;cursor:pointer;font-size:15px">البحث عن تحديثات</button>' +
+  '</div>';
+  // ---------------------------
 
-    $('screen-settings').innerHTML = html;
+  html += '<div class="panel">' +
+    '<h3>معلومات التطبيق</h3>' +
+    '<p style="font-size:13px;color:#475569;margin:0 0 6px">اسم التطبيق: مخزون المنزل</p>' +
+    '<p style="font-size:13px;color:#475569;margin:0 0 6px">رقم الإصدار: <b style="color:#0d9488">v'+APP_VERSION+'</b></p>' +
+    '<p style="font-size:13px;color:#475569;margin:0 0 6px">الحالة: يعمل بدون إنترنت (PWA)</p>' +
+    '<p style="font-size:11px;color:#94a3b8;margin-top:10px">تم التطوير ليعمل محلياً بالكامل بدون أي خوادم خارجية لحماية خصوصيتك.</p>' +
+  '</div>';
+
+  $('screen-settings').innerHTML = html;
+}
+
+// ---- دالة التحديث الجديدة ----
+function checkForUpdates() {
+  if (!('serviceWorker' in navigator)) {
+    toast('متصفحك لا يدعم هذه الميزة');
+    return;
   }
+  
+  var btn = $('updateBtn');
+  if (btn) { btn.textContent = 'جاري البحث... ⏳'; btn.disabled = true; }
+
+  navigator.serviceWorker.getRegistration().then(function(reg) {
+    if (!reg) {
+      toast('لم يتم العثور على خدمة التحديث. يرجى إعادة فتح التطبيق.');
+      if (btn) { btn.textContent = 'البحث عن تحديثات'; btn.disabled = false; }
+      return;
+    }
+
+    // إجبار المتصفح على سحب نسخة جديدة من sw.js
+    reg.update().then(function() {
+      if (reg.waiting) {
+        // إذا كان هناك تحديث جاهز
+        toast('تم العثور على تحديث! جاري التطبيق...');
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      } else {
+        reg.onupdatefound = function() {
+          var installingWorker = reg.installing;
+          installingWorker.onstatechange = function() {
+            if (installingWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                toast('تم العثور على تحديث! جاري إعادة التشغيل...');
+                installingWorker.postMessage({ type: 'SKIP_WAITING' });
+              }
+            }
+          };
+        };
+        
+        // إعطاء المتصفح مهلة للبحث
+        setTimeout(function() {
+          if (btn) { btn.textContent = 'البحث عن تحديثات'; btn.disabled = false; }
+          if (!reg.waiting) {
+            toast('أنت تستخدم أحدث إصدار ✅');
+          }
+        }, 2500);
+      }
+    }).catch(function(err) {
+      console.error(err);
+      toast('حدث خطأ أثناء البحث عن التحديثات');
+      if (btn) { btn.textContent = 'البحث عن تحديثات'; btn.disabled = false; }
+    });
+  });
+}
 
   function openModal(html){
     $('modalBox').innerHTML = html;

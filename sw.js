@@ -1,12 +1,12 @@
-const CACHE_NAME = 'home-inv-v2.2.0';
+const CACHE_NAME = 'home-inv-v2.3.0'; // تم رفع رقم الإصدار
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './icon.svg',
   './icon.png'
 ];
 
-// تثبيت الكاش
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -15,7 +15,6 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// تفعيل وتحديث الكاش القديم
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -30,11 +29,17 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// جلب الملفات من الكاش عند انقطاع الإنترنت
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((cached) => {
       return cached || fetch(e.request);
     })
   );
+});
+
+// هذا الجزء الجديد: للاستماع لأمر التحديث القادم من صفحة الإعدادات
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting(); // تفعيل التحديث الجديد فوراً
+  }
 });
