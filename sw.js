@@ -1,4 +1,4 @@
-const CACHE_NAME = 'home-inv-v3.1.0';
+const CACHE_NAME = 'home-inv-v3.3.2';
 const ASSETS = [
   './',
   './index.html',
