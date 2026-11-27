@@ -12,7 +12,9 @@
   --primary:#0d9488;--primary-dark:#0f766e;--bg:#f8fafc;--surface:#ffffff;
   --border:#e8edf3;--border-strong:#cbd5e1;--text:#0f172a;--text-muted:#64748b;
   --green:#16a34a;--green-bg:#dcfce7;--amber:#d97706;--amber-bg:#fef3c7;
-  --red:#dc2626;--red-bg:#fee2e2;--radius:12px;
+  --red:#dc2626;--red-bg:#fee2e2;--blue:#3b82f6;--blue-bg:#dbeafe;
+  --purple:#8b5cf6;--purple-bg:#ede9fe;
+  --radius:12px;
   --shadow-sm:0 1px 2px rgba(15,23,42,.04);--shadow-md:0 4px 14px rgba(15,23,42,.07);
   --shadow-lg:0 12px 32px rgba(15,23,42,.14);--ease:cubic-bezier(.4,0,.2,1);
 }
@@ -92,60 +94,48 @@ button{font-family:inherit}
 .empty{text-align:center;padding:44px 20px;color:var(--text-muted);border:2px dashed var(--border-strong);border-radius:var(--radius);font-size:13px;line-height:1.7}
 .day-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(135deg,#0d9488 0%,#0f766e 100%);color:#fff;border-radius:10px;margin:14px 0 8px;font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(13,148,136,.25);animation:slideIn .3s var(--ease)}
 
-/* ===== تصميم أيقونة التقويم المطابقة للإيموجي تماماً ===== */
-.emoji-cal {
-  display: inline-flex;
+/* ===== تصميم أيقونة التقويم ===== */
+.emoji-cal{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;background:#ffffff;border-radius:4px;width:26px;height:26px;border:1px solid #d1d5db;box-shadow:inset 0 0 2px rgba(0,0,0,0.1),0 1px 3px rgba(0,0,0,0.2);flex-shrink:0;position:relative;direction:ltr}
+.emoji-cal .cal-top{background:#ea4335;width:100%;height:7px;border-top-left-radius:3px;border-top-right-radius:3px;position:relative}
+.emoji-cal .cal-top::before,.emoji-cal .cal-top::after{content:'';position:absolute;top:-1px;width:3px;height:6px;background:#9aa0a6;border-radius:2px}
+.emoji-cal .cal-top::before{left:5px}.emoji-cal .cal-top::after{right:5px}
+.emoji-cal .cal-day{font-family:Arial,sans-serif;font-size:11px;font-weight:900;color:#202124;line-height:1;margin-top:1px}
+.emoji-cal .cal-month{font-family:Arial,sans-serif;font-size:6.5px;font-weight:bold;color:#ea4335;text-transform:uppercase;line-height:1;margin-top:1px;letter-spacing:-0.2px}
+
+/* ===== رسوم بيانية ===== */
+.donut-chart {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.donut-inner {
+  width: 80px;
+  height: 80px;
+  background: var(--surface);
+  border-radius: 50%;
+  display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  background: #ffffff;
-  border-radius: 4px;
-  width: 26px;
-  height: 26px;
-  border: 1px solid #d1d5db;
-  box-shadow: inset 0 0 2px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.2);
-  flex-shrink: 0;
-  position: relative;
-  direction: ltr; /* لضمان ثبات الأرقام والشهر */
+  justify-content: center;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.06);
 }
-.emoji-cal .cal-top {
-  background: #ea4335;
-  width: 100%;
-  height: 7px;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  position: relative;
+.donut-inner span { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+.donut-inner b { font-size: 13px; font-weight: bold; color: var(--text); }
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border);
 }
-/* الحلقات المعدنية في أعلى التقويم */
-.emoji-cal .cal-top::before, .emoji-cal .cal-top::after {
-  content: '';
-  position: absolute;
-  top: -1px;
-  width: 3px;
-  height: 6px;
-  background: #9aa0a6;
-  border-radius: 2px;
-}
-.emoji-cal .cal-top::before { left: 5px; }
-.emoji-cal .cal-top::after { right: 5px; }
-.emoji-cal .cal-day {
-  font-family: Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 900;
-  color: #202124;
-  line-height: 1;
-  margin-top: 1px;
-}
-.emoji-cal .cal-month {
-  font-family: Arial, sans-serif;
-  font-size: 6.5px;
-  font-weight: bold;
-  color: #ea4335;
-  text-transform: uppercase;
-  line-height: 1;
-  margin-top: 1px;
-  letter-spacing: -0.2px;
-}
+.legend-item:last-child { border-bottom: 0; }
+.legend-color { width: 10px; height: 10px; border-radius: 3px; margin-left: 6px; flex-shrink: 0; display: inline-block; vertical-align: middle; }
 
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -206,7 +196,7 @@ if ('serviceWorker' in navigator) {
 
 var App = (function(){
   var KEY = 'home_inv_v3';
-  var APP_VERSION = '3.3.2';
+  var APP_VERSION = '3.4.0';
   var UNITS = ['قطعة','كجم','جم','لتر','مل','علبة','كيس','زجاجة','عبوة','متر','صندوق','دستة','رول'];
   var DEF_CATS = ['مواد غذائية','منظفات','أدوات منزلية','عناية شخصية','أدوية','معلبات','مشروبات','بهارات','أخرى'];
 
@@ -430,7 +420,6 @@ var App = (function(){
         var groupDayStart = new Date(groupDate); groupDayStart.setHours(0,0,0,0);
         var dayDiff = Math.round((todayStart.getTime() - groupDayStart.getTime()) / DAY);
         
-        // جلب اليوم والشهر لعرضهم داخل الأيقونة
         var gDay = groupDate.getDate();
         var gMonthIndex = groupDate.getMonth();
         var gMonthEng = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][gMonthIndex];
@@ -441,7 +430,6 @@ var App = (function(){
         else if (dayDiff === 1) dayLabel = 'أمس';
         else dayLabel = gDay + ' ' + gMonthAr + ' ' + groupDate.getFullYear();
 
-        // تصميم الأيقونة بالـ CSS لتبدو مثل الإيموجي تماماً
         var calIconHtml = '<div class="emoji-cal"><div class="cal-top"></div><div class="cal-day">' + gDay + '</div><div class="cal-month">' + gMonthEng + '</div></div>';
 
         html += '<div class="day-header"><span style="display:flex;align-items:center;gap:8px;">' + calIconHtml + ' <span>' + dayLabel + '</span></span><span style="font-size:11px;opacity:.9">'+groupLogs.length+' حركة</span></div>';
@@ -470,6 +458,7 @@ var App = (function(){
     $('screen-log').innerHTML = html;
   }
 
+  /* ============ التقارير التحليلية المطورة ============ */
   function renderStats(){
     var DAY = 86400000;
     var now = Date.now();
@@ -488,6 +477,7 @@ var App = (function(){
     var lastM = { inQty: 0, outQty: 0, spent: 0, tx: 0 };
     var cons30 = {}, lastMove = {};
     var inCountAll = 0, outCountAll = 0;
+    var totalConsumedValue = 0;
 
     for (var j=0; j<state.log.length; j++){
       var l = state.log[j];
@@ -496,7 +486,7 @@ var App = (function(){
       var val = q * p;
 
       if (l.type === 'in') inCountAll++;
-      if (l.type === 'out') outCountAll++;
+      if (l.type === 'out') { outCountAll++; totalConsumedValue += val; }
 
       if (l.at >= monthStart){
         thisM.tx++;
@@ -550,26 +540,31 @@ var App = (function(){
       deplete.push({ item: itm, rate: rate, days: days });
     }
     deplete.sort(function(a,b){ return a.days - b.days; });
-    deplete = deplete.slice(0, 8);
+    deplete = deplete.slice(0, 5);
 
     var slow = [];
+    var deadStockValue = 0;
     for (var n=0; n<state.items.length; n++){
       var itn = state.items[n];
       var lastT = lastMove[itn.id] || itn.createdAt || 0;
       var daysSince = (now - lastT) / DAY;
       if (daysSince >= 30 && num(itn.qty) > 0){
         slow.push({ item: itn, days: Math.floor(daysSince) });
+        deadStockValue += num(itn.qty) * num(itn.price);
       }
     }
     slow.sort(function(a,b){ return b.days - a.days; });
-    slow = slow.slice(0, 6);
+    slow = slow.slice(0, 5);
+
+    // أغلى الأصناف في المخزن
+    var expensiveItems = state.items.slice().sort(function(a,b){ return (num(b.qty)*num(b.price)) - (num(a.qty)*num(a.price)); }).slice(0, 5);
 
     var consumed = {};
     for (var x=0; x<state.log.length; x++){
       var lx = state.log[x];
       if (lx.type === 'out') consumed[lx.itemName] = (consumed[lx.itemName] || 0) + num(lx.qty);
     }
-    var conKeys = Object.keys(consumed).sort(function(a,b){ return consumed[b] - consumed[a]; }).slice(0, 6);
+    var conKeys = Object.keys(consumed).sort(function(a,b){ return consumed[b] - consumed[a]; }).slice(0, 5);
 
     var byCat = {};
     for (var y=0; y<state.items.length; y++){
@@ -593,8 +588,46 @@ var App = (function(){
 
     var html = '';
 
-    html += '<div class="stat"><div><b>'+fmt(totalValue)+'</b><span>قيمة ('+esc(state.currency)+')</span></div><div><b>'+state.items.length+'</b><span>أصناف</span></div><div><b>'+inCountAll+'</b><span>إضافات</span></div><div><b>'+outCountAll+'</b><span>سحب</span></div></div>';
+    // 1. الملخص المالي الشامل
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:var(--shadow-sm)"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);margin-bottom:6px"><span style="background:var(--primary);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px">🏠</span> قيمة المخزون</div><div style="font-size:18px;font-weight:bold;color:var(--primary)">'+fmt(totalValue)+' <span style="font-size:11px;color:var(--text-muted)">'+esc(state.currency)+'</span></div></div>';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:var(--shadow-sm)"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);margin-bottom:6px"><span style="background:var(--green);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px">🛒</span> إجمالي المشتريات</div><div style="font-size:18px;font-weight:bold;color:var(--green)">'+fmt(thisM.spent)+' <span style="font-size:11px;color:var(--text-muted)">'+esc(state.currency)+'</span></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">هذا الشهر</div></div>';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:var(--shadow-sm)"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);margin-bottom:6px"><span style="background:var(--red);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px">📉</span> قيمة الاستهلاك</div><div style="font-size:18px;font-weight:bold;color:var(--red)">'+fmt(totalConsumedValue)+' <span style="font-size:11px;color:var(--text-muted)">'+esc(state.currency)+'</span></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">إجمالي ما تم سحبه</div></div>';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:var(--shadow-sm)"><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);margin-bottom:6px"><span style="background:var(--amber);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px">🐢</span> قيمة الراكد</div><div style="font-size:18px;font-weight:bold;color:var(--amber)">'+fmt(deadStockValue)+' <span style="font-size:11px;color:var(--text-muted)">'+esc(state.currency)+'</span></div><div style="font-size:10px;color:var(--text-muted);margin-top:4px">أصناف لم تُستخدم منذ 30 يوم</div></div>';
+    html += '</div>';
 
+    // 2. الرسم البياني الدائري (توزيع القيمة)
+    if (catKeys.length > 0) {
+      var colors = ['#0d9488', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'];
+      var gradientParts = [];
+      var currentDeg = 0;
+      var legendHtml = '';
+      
+      for (var ck=0; ck<catKeys.length; ck++){
+        var kk = catKeys[ck];
+        var catVal = byCat[kk];
+        var pctVal = (catVal / totalValue) * 100;
+        var deg = (pctVal / 100) * 360;
+        var color = colors[ck % colors.length];
+        
+        gradientParts.push(color + ' ' + currentDeg + 'deg ' + (currentDeg + deg) + 'deg');
+        currentDeg += deg;
+
+        legendHtml += '<div class="legend-item"><span><span class="legend-color" style="background:'+color+'"></span>'+esc(kk)+'</span><b>'+Math.round(pctVal)+'%</b></div>';
+      }
+      
+      var conicGradient = 'conic-gradient(' + gradientParts.join(', ') + ')';
+
+      html += '<div class="panel"><h3>🍩 توزيع القيمة حسب الفئة</h3>';
+      html += '<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">';
+      html += '<div class="donut-chart" style="background:'+conicGradient+'">';
+      html += '<div class="donut-inner"><span>الإجمالي</span><b>'+fmt(totalValue)+'</b></div>';
+      html += '</div>';
+      html += '<div style="flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px">' + legendHtml + '</div>';
+      html += '</div></div>';
+    }
+
+    // 3. تقرير الشهر ومقارنته
     var monthName = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'][nowD.getMonth()];
     html += '<div class="panel"><h3>📅 تقرير شهر '+monthName+'</h3>';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
@@ -610,6 +643,7 @@ var App = (function(){
     }
     html += '</div>';
 
+    // 4. النشاط اليومي (14 يوم)
     html += '<div class="panel"><h3>📊 النشاط اليومي (آخر 14 يوم)</h3>';
     html += '<div style="display:flex;gap:14px;font-size:11px;margin-bottom:12px;color:var(--text-muted)"><span><span style="display:inline-block;width:12px;height:3px;background:var(--green);border-radius:2px;margin-left:4px;vertical-align:middle"></span>إضافة</span><span><span style="display:inline-block;width:12px;height:3px;background:var(--red);border-radius:2px;margin-left:4px;vertical-align:middle"></span>سحب</span></div>';
     html += '<div style="display:grid;gap:7px">';
@@ -632,6 +666,23 @@ var App = (function(){
     if (!hasDaily) html += '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px">لا يوجد نشاط خلال 14 يوم الماضية</div>';
     html += '</div></div>';
 
+    // 5. أغلى الأصناف في المخزن
+    if (expensiveItems.length) {
+      html += '<div class="panel"><h3>💎 أغلى الأصناف في المخزن</h3>';
+      html += '<div style="display:flex;flex-direction:column;gap:6px">';
+      for (var ei=0; ei<expensiveItems.length; ei++){
+        var expItem = expensiveItems[ei];
+        var expVal = num(expItem.qty) * num(expItem.price);
+        var expPct = (expVal / (totalValue || 1)) * 100;
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f8fafc;border-radius:8px;font-size:12px">';
+        html += '<span style="font-weight:bold;word-break:break-word">'+esc(expItem.name)+'</span>';
+        html += '<div style="text-align:left;flex-shrink:0;margin-right:8px"><b style="color:var(--primary)">'+fmt(expVal)+'</b> <span style="color:var(--text-muted);font-size:10px">('+Math.round(expPct)+'%)</span></div>';
+        html += '</div>';
+      }
+      html += '</div></div>';
+    }
+
+    // 6. توقع نفاذ الأصناف
     if (deplete.length){
       html += '<div class="panel"><h3>⏳ توقع نفاذ الأصناف</h3>';
       html += '<p style="font-size:11px;color:var(--text-muted);margin:0 0 10px;line-height:1.7">بناءً على معدل استهلاكك آخر 30 يوم:</p>';
@@ -648,6 +699,7 @@ var App = (function(){
       html += '</div>';
     }
 
+    // 7. أصناف راكدة
     if (slow.length){
       html += '<div class="panel"><h3>🐢 أصناف راكدة</h3>';
       html += '<p style="font-size:11px;color:var(--text-muted);margin:0 0 10px;line-height:1.7">هذه الأصناف لم تُستخدم منذ أكثر من 30 يوم — راجع حاجتك لها.</p>';
@@ -658,19 +710,7 @@ var App = (function(){
       html += '</div>';
     }
 
-    html += '<div class="panel"><h3>💰 القيمة حسب الفئة</h3>';
-    if (!catKeys.length){
-      html += '<p style="color:var(--text-muted);font-size:13px;margin:0">لا توجد أصناف</p>';
-    } else {
-      var maxV = byCat[catKeys[0]] || 1;
-      for (var ck=0; ck<catKeys.length; ck++){
-        var kk = catKeys[ck];
-        var pctV = (byCat[kk] / maxV) * 100;
-        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;font-size:12px"><span style="flex:0 0 90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(kk)+'</span><div style="flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden"><div style="height:100%;width:'+pctV+'%;background:var(--primary);border-radius:99px;transition:width .5s var(--ease)"></div></div><span style="min-width:50px;text-align:left;font-weight:bold">'+fmt(byCat[kk])+'</span></div>';
-      }
-    }
-    html += '</div>';
-
+    // 8. أكثر الأصناف استهلاكاً
     html += '<div class="panel"><h3>🔥 أكثر الأصناف استهلاكاً</h3>';
     if (!conKeys.length){
       html += '<p style="color:var(--text-muted);font-size:13px;margin:0">لا توجد عمليات سحب بعد</p>';
@@ -684,6 +724,7 @@ var App = (function(){
     }
     html += '</div>';
 
+    // 9. أصناف تحتاج شراء
     html += '<div class="panel"><h3>🛒 أصناف تحتاج شراء ('+lowItems.length+')</h3>';
     if (!lowItems.length){
       html += '<p style="color:var(--green);font-size:13px;margin:0">✅ كل الأصناف متوفرة</p>';
